@@ -1,5 +1,5 @@
 {
-	"name": "n8n-nodes-permitio",
+	"name": "@permitio/n8n-nodes-permitio",
 	"version": "0.2.0",
 	"description": "n8n node for Permit.io authorization service",
 	"keywords": [
