@@ -5,7 +5,11 @@
 	"keywords": [
 		"n8n-community-node-package"
 	],
-	"author": "Permit.io",
+	"author": {
+		"name": "Permit.io",
+		"email": "dev@permit.io",
+		"url": "https://permit.io"
+	},
 	"license": "MIT",
 	"homepage": "https://github.com/permitio/n8n-nodes-permitio",
 	"repository": {
