@@ -7,10 +7,6 @@
 	],
 	"license": "MIT",
 	"homepage": "https://github.com/permitio/n8n-nodes-permitio",
-	"author": {
-		"name": "Taofiq Aiyelabegan",
-		"email": "taofiqaiyelabegan45@gmail.com"
-	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/permitio/n8n-nodes-permitio.git"
