@@ -225,8 +225,7 @@ export class Permit implements INodeType {
 
 		const credentials = await this.getCredentials('permitApi');
 		const pdpUrl = (credentials.pdpUrl as string).trim();
-		const apiKey = credentials.apiKey as string;
-		const permitClient = new PermitApiClient(this, pdpUrl, apiKey);
+		const permitClient = new PermitApiClient(this, pdpUrl);
 
 		for (let i = 0; i < items.length; i++) {
 			try {

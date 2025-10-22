@@ -6,21 +6,20 @@ export class PermitApiClient {
 	constructor(
 		private executeFunctions: IExecuteFunctions,
 		private pdpUrl: string,
-		private apiKey: string,
 	) {}
 
 	async makeRequest(endpoint: string, body: any): Promise<any> {
-		return await this.executeFunctions.helpers.httpRequest({
-			method: 'POST',
-			baseURL: this.pdpUrl,
-			url: endpoint,
-			headers: {
-				Authorization: `Bearer ${this.apiKey}`,
-				'Content-Type': 'application/json',
+		return await this.executeFunctions.helpers.httpRequestWithAuthentication.call(
+			this.executeFunctions,
+			'permitApi',
+			{
+				method: 'POST',
+				baseURL: this.pdpUrl,
+				url: endpoint,
+				body,
+				json: true,
 			},
-			body,
-			json: true,
-		});
+		);
 	}
 
 	async checkPermission(
