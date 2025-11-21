@@ -108,6 +108,18 @@ export class Permit implements INodeType {
 				description: 'Resource to check access to',
 				required: true,
 			},
+			{
+				displayName: 'Enable ABAC',
+				name: 'enableAbacCheck',
+				type: 'boolean',
+				displayOptions: {
+					show: {
+						operation: ['check'],
+					},
+				},
+				default: false,
+				description: 'Whether to enable ABAC with auto-extracted attributes',
+			},
 			// parameters for Get User Permissions operation
 			{
 				displayName: 'User',
@@ -238,8 +250,17 @@ export class Permit implements INodeType {
 					const action = this.getNodeParameter('action', i) as string;
 					const resource = this.getNodeParameter('resource', i) as string;
 					const tenant = (this.getNodeParameter('tenant', i) as string) || 'default';
+					const enableAbac = this.getNodeParameter('enableAbacCheck', i) as boolean;
+					const resourceAttributes = enableAbac ? items[i].json.body : {};
 
-					responseData = await permitClient.checkPermission(user, action, resource, tenant);
+					responseData = await permitClient.checkPermission(
+						user,
+						action,
+						resource,
+						tenant,
+						resourceAttributes,
+						enableAbac,
+					);
 				} else if (operation === 'getUserPermissions') {
 					const user = this.getNodeParameter('userPermissionsUser', i) as string;
 					const resourceTypes = this.getNodeParameter('resourceTypes', i) as string;

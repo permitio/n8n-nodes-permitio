@@ -27,12 +27,21 @@ export class PermitApiClient {
 		action: string,
 		resource: string,
 		tenant: string = 'default',
+		resourceAttributes: any = {},
+		enableAbac?: boolean,
 	): Promise<any> {
-		return this.makeRequest('/allowed', {
+		const requestBody: any = {
 			user: { key: user },
 			action: action,
-			resource: { type: resource, tenant: tenant },
-		});
+			resource: {
+				type: resource,
+				tenant: tenant,
+				...(enableAbac &&
+					Object.keys(resourceAttributes).length > 0 && { attributes: resourceAttributes }),
+			},
+		};
+
+		return this.makeRequest('/allowed', requestBody);
 	}
 
 	async getUserPermissions(
