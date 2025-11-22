@@ -2,7 +2,10 @@
 
 # n8n-nodes-permitio
 
-An n8n community node for integrating with [Permit.io](https://permit.io) authorization service. This node allows you to check permissions, retrieve user permissions, and get authorized users directly within your n8n workflows.
+An n8n community node for integrating with [Permit.io](https://permit.io) authorization service.
+Permit is a fullstack, plug-and-play application-level authorization solution. This node allows you to check permissions, retrieve user permissions, and get authorized users directly within your n8n workflows.
+
+![ABAC Expense Approval System](/assets/permit-n8n-workflow.png)
 
 ## Features
 
@@ -12,164 +15,193 @@ An n8n community node for integrating with [Permit.io](https://permit.io) author
 
 ## Installation
 
-### Community Nodes (Recommended)
+**Install via n8n UI:**
 
-1. Go to **Settings > Community Nodes** in your n8n instance
-2. Select **Install**
-3. Enter `n8n-nodes-permitio`
-4. Select **Install**
+1. In your n8n workflow editor, click the "+" to add a new node
+2. Search for "Permit" in the node search box
+3. Click on the Permit node in the search results
+4. Click "Install node" button in the Node details panel
+5. Wait for installation to complete
+6. The Permit node will now be available in your workflow
 
-After installation restart n8n to register the new nodes.
+**Package name:** `@permitio/n8n-nodes-permitio`
+![Installation Guide](/assets/permit-n8n-installation.gif)
 
-### Manual Installation
+For alternative installation methods, follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
-To get started install the package in your n8n root directory:
+## Credentials
 
-```bash
-npm install n8n-nodes-permitio
-```
+To use this node, you need to set up Permit.io API credentials in n8n.
 
-For Docker-based deployments add the following line before the font installation command in your n8n Dockerfile:
+**Prerequisites:**
 
-```dockerfile
-RUN cd /usr/local/lib/node_modules/n8n && npm install n8n-nodes-permitio
-```
+- A [Permit.io account](https://app.permit.io)
+- Your Permit.io API key
 
-## Credentials Configuration
+**Setting up credentials:**
 
-Before using the Permit node, you need to configure your Permit.io credentials:
+1. In n8n, go to the **Overview** tab in the left sidebar
+2. Click on the **Credentials** tab
+3. Click **"Add first credential"** (or **"Create credential"** if you have existing credentials)
+4. Search for **"Permit"** and select **"Permit API"**
+5. Fill in the required fields:
+   - **API Key**: Your Permit.io API key (found in Permit.io dashboard under Settings → API Keys)
+   - **PDP URL**: `https://cloudpdp.api.permit.io` (default for cloud PDP)
 
-1. In n8n, go to **Credentials** and create new **Permit API** credentials
-2. Fill in the required fields:
-   - **API Key**: Your Permit.io API key (get it from [Permit Dashboard](https://app.permit.io))
-   - **PDP URL**: Policy Decision Point URL (defaults to `https://cloudpdp.api.permit.io`)
+**For ABAC and ReBAC policies:**
 
-### Getting Your API Key
+- **Local PDP**: If running a self-hosted PDP container, you'll need to expose it publicly (e.g., using ngrok) and use that public URL
+- Example: `https://abc123.ngrok.io` instead of `http://localhost:7766`
+- This provides better performance and supports advanced policy types
 
-1. Log in to your [Permit.io Dashboard](https://app.permit.io)
-2. Navigate to the **Settings** section
-3. Copy your **API Key**
-4. For local development, you may need to run a local PDP instance
+**Getting your API key:**
+
+1. Log into your [Permit.io dashboard](https://app.permit.io)
+2. Go to Settings → API Keys
+3. Copy your API key and paste it into the n8n credential configuration
+
+![Credentials Workflow](/assets/credentials-workflow.gif)
+
+**Note:** Keep your API key secure and never share it publicly.
 
 ## Operations
 
-### Check Permission
+**Check**
 
-Verifies if a user has permission to perform a specific action on a resource.
+- Check if a user has permission to perform an action on a resource
+- Supports RBAC, ABAC, and ReBAC policies with automatic attribute extraction
+- Returns boolean permission result with detailed debug information
 
-**Parameters:**
+_Configuration:_
 
-- **User** (required): User identifier (email or user key)
-- **Action** (required): Action to check (e.g., "read", "write", "delete")
-- **Resource** (required): Resource type to check access to (e.g., "document", "file")
-- **Tenant** (optional): Tenant identifier (defaults to "default")
+- **User:** `{{$node['Webhook'].json.body.employee_email}}`
+- **Action:** `submit`
+- **Resource:** `expense`
+- **Enable ABAC:** ✅ (automatically extracts `expense_amount`, `category`, etc.)
 
-**Example Response:**
+_Response Sample:_
 
 ```json
 {
 	"allow": true,
-	"reason": "user 'john@example.com' has the role 'editor' in tenant 'default', role 'editor' has the 'read' permission on resources of type 'document'"
-}
-```
-
-### Get User Permissions
-
-Retrieves all permissions for a specific user across all tenants.
-
-**Parameters:**
-
-- **User** (required): User identifier to get permissions for
-- **Resource Types** (optional): Comma-separated list of resource types to filter by (e.g., "document,folder,\_\_tenant")
-- **Enable ABAC** (optional): Enable Attribute-Based Access Control for more detailed permissions
-
-**Special Resource Types:**
-
-- Use `__tenant` to include tenant-level permissions (admin, management permissions)
-- Leave empty to get permissions for all resource types
-
-**Example Response:**
-
-```json
-{
-	"tenant1": {
-		"document": {
-			"doc1": ["read", "write"],
-			"doc2": ["read"]
-		},
-		"__tenant": {
-			"tenant1": ["admin"]
-		}
+	"decision": "2024-01-15T10:30:00Z",
+	"debug": {
+		"reason": "User john.employee can submit expense within $2000 limit"
 	}
 }
 ```
 
-### Get Authorized Users
+**Get User Permissions**
 
-Finds all users authorized to perform a specific action on a resource type.
+- Get all permissions for a specific user
+- Filter by resource types
+- Optional ABAC support for dynamic permissions
 
-**Parameters:**
+_Configuration:_
 
-- **Action** (required): Action to check authorization for (e.g., "read", "write")
-- **Resource Type** (required): Type of resource (e.g., "document", "folder")
-- **Tenant** (optional): Tenant identifier (defaults to "default")
-- **Resource Attributes** (optional): JSON object with resource attributes for filtering
-- **Enable ABAC** (optional): Enable Attribute-Based Access Control
+- **User:** `john.employee`
+- **Resource Types:** `expense,document`
+- **Enable ABAC:** ✅
 
-**Example Resource Attributes:**
+_Response Sample:_
 
 ```json
 {
-	"cost": 1000,
-	"department": "engineering"
+	"permissions": [
+		{
+			"resource": "expense",
+			"action": "submit",
+			"allowed": true
+		}
+	]
 }
 ```
 
-**Example Response:**
+**Get Authorized Users**
+
+- Find all users who can perform a specific action on a resource
+- Useful for approval workflows and delegation
+- Returns list of authorized users with their roles and permissions
+
+_Configuration:_
+
+- **Action:** `approve`
+- **Resource Type:** `expense`
+- **Resource Attributes:** `{"expense_amount": 1500, "category": "Travel"}`
+- **Enable ABAC:** ✅
+
+_Response Sample:_
 
 ```json
 [
 	{
-		"user": {
-			"key": "john@example.com",
-			"email": "john@example.com"
-		},
-		"role": "editor"
-	},
-	{
-		"user": {
-			"key": "jane@example.com",
-			"email": "jane@example.com"
-		},
-		"role": "admin"
+		"resource": "expense:*",
+		"tenant": "default",
+		"users": {
+			"taofeek2sure@gmail.com": [
+				{
+					"user": "taofeek2sure@gmail.com",
+					"tenant": "default",
+					"resource": "resourceset_all_5fexpenses",
+					"role": "userset_finance_5fteam"
+				}
+			]
+		}
 	}
 ]
 ```
 
-## Usage Examples
+## Basic Usage Example
 
-### Basic Permission Check Workflow
+This example shows how to build an ABAC-powered expense approval workflow using the Permit node.
 
-1. Add a **Manual Trigger** node
-2. Add the **Permit** node and select **Check** operation
-3. Configure:
-   - **User**: `john@example.com`
-   - **Action**: `read`
-   - **Resource**: `document`
-   - **Tenant**: `default`
-4. Add an **IF** node to handle the permission result based on the `allow` field
+**Scenario:** Employees submit expenses for approval. The system automatically determines if they can submit based on their spending limits, then routes to authorized approvers.
 
-### User Permissions Audit
+**Workflow:**
 
-1. Use **Get User Permissions** operation
-2. Set **Resource Types** to `document,folder,__tenant` to get comprehensive permissions
-3. Process the response to create permission reports or dashboards
+1. **Webhook** receives expense submission (`employee_email`, `expense_amount`, `category`)
+2. **Check Permission** with ABAC enabled - automatically extracts expense attributes
+3. **IF node** branches on approval/denial
+4. **TRUE path:** Get Authorized Users → Send Email to approver
+5. **FALSE path:** Return 403 error response
 
-## Support
+**Result:**
 
+- Employee submitting $1500 (within $2000 limit) → Email sent to finance approver
+- Employee submitting $2500 (exceeds limit) → Access denied with detailed error
+
+This demonstrates how the Permit node enables complex authorization workflows with minimal configuration.
+
+## Compatibility
+
+- **Minimum n8n version**: 1.0+
+- **Node.js**: 20.15+ required
+- **Tested with**: n8n 1.111.0
+
+## Resources
+
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
 - [Permit.io Documentation](https://docs.permit.io/)
-- [n8n Community Forum](https://community.n8n.io/)
-- [GitHub Issues](https://github.com/permitio/n8n-nodes-permitio/issues)
+- [Permit.io API Reference](https://api.permit.io/v2/redoc)
+- [Getting Started with Permit.io](https://docs.permit.io/quickstart/)
+
+**Authorization Models:**
+
+- [ABAC Guide - Building Your First ABAC Policy](https://docs.permit.io/how-to/build-policies/abac/building-abac-policy/)
+- [ReBAC Guide - What is ReBAC?](https://docs.permit.io/how-to/build-policies/rebac/overview/)
+- [Create a ReBAC Policy](https://docs.permit.io/overview/create-a-rebac-policy/)
+
+**Infrastructure & Deployment:**
+
+- [Terraform Provider Guide](https://docs.permit.io/integrations/infra-as-code/terraform-provider/)
+- [Self-Deployed PDP for ABAC/ReBAC](https://docs.permit.io/concepts/pdp/overview/)
+- [Running Local PDP Container](https://docs.permit.io/overview/connecting-your-app/)
+
+**API Methods:**
+
+- [Permit.check() - Permission Checking](https://docs.permit.io/how-to/enforce-permissions/check/)
+- [Get User Permissions API](https://docs.permit.io/how-to/enforce-permissions/user-permissions/)
+- [Get Authorized Users API](https://docs.permit.io/how-to/enforce-permissions/authorized-users/)
 
 ## License
 
