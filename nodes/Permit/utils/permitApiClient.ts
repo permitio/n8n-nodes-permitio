@@ -29,6 +29,7 @@ export class PermitApiClient {
 		tenant: string = 'default',
 		resourceAttributes: any = {},
 		enableAbac?: boolean,
+		resourceKey?: string,
 	): Promise<any> {
 		const requestBody: any = {
 			user: { key: user },
@@ -36,6 +37,7 @@ export class PermitApiClient {
 			resource: {
 				type: resource,
 				tenant: tenant,
+				...(resourceKey && { key: resourceKey }),
 				...(enableAbac &&
 					Object.keys(resourceAttributes).length > 0 && { attributes: resourceAttributes }),
 			},

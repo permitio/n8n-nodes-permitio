@@ -120,6 +120,19 @@ export class Permit implements INodeType {
 				default: false,
 				description: 'Whether to enable ABAC with auto-extracted attributes',
 			},
+			{
+				displayName: 'Resource Key',
+				name: 'resourceKey',
+				type: 'string',
+				displayOptions: {
+					show: {
+						operation: ['check'],
+					},
+				},
+				default: '',
+				description: 'Specific resource instance key (required for ReBAC)',
+				placeholder: 'gpt4',
+			},
 			// parameters for Get User Permissions operation
 			{
 				displayName: 'User',
@@ -252,6 +265,7 @@ export class Permit implements INodeType {
 					const tenant = (this.getNodeParameter('tenant', i) as string) || 'default';
 					const enableAbac = this.getNodeParameter('enableAbacCheck', i) as boolean;
 					const resourceAttributes = enableAbac ? items[i].json.body : {};
+					const resourceKey = this.getNodeParameter('resourceKey', i) as string;
 
 					responseData = await permitClient.checkPermission(
 						user,
@@ -260,6 +274,7 @@ export class Permit implements INodeType {
 						tenant,
 						resourceAttributes,
 						enableAbac,
+						resourceKey,
 					);
 				} else if (operation === 'getUserPermissions') {
 					const user = this.getNodeParameter('userPermissionsUser', i) as string;
