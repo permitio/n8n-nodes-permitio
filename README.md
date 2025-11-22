@@ -1,3 +1,5 @@
+![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+
 # n8n-nodes-permitio
 
 An n8n community node for integrating with [Permit.io](https://permit.io) authorization service. This node allows you to check permissions, retrieve user permissions, and get authorized users directly within your n8n workflows.
