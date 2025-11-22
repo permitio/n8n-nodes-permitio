@@ -153,6 +153,8 @@ _Response Sample:_
 
 ## Basic Usage Example
 
+![ABAC Expense Example](/assets/abac-expense-example.png)
+
 This example shows how to build an ABAC-powered expense approval workflow using the Permit node.
 
 **Scenario:** Employees submit expenses for approval. The system automatically determines if they can submit based on their spending limits, then routes to authorized approvers.
