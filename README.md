@@ -25,7 +25,7 @@ Permit is a fullstack, plug-and-play application-level authorization solution. T
 6. The Permit node will now be available in your workflow
 
 **Package name:** `@permitio/n8n-nodes-permitio`
-![Installation Guide](/assets/permit-n8n-installation.gif)
+![Installation Guide](./assets/permit-n8n-installation.gif)
 
 For alternative installation methods, follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
