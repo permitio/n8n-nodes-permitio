@@ -60,7 +60,7 @@ To use this node, you need to set up Permit.io API credentials in n8n.
 2. Go to Settings → API Keys
 3. Copy your API key and paste it into the n8n credential configuration
 
-![Credentials Workflow](/assets/credentials-workflow.gif)
+![Credentials Workflow](./assets/credentials-workflow.gif)
 
 **Note:** Keep your API key secure and never share it publicly.
 
